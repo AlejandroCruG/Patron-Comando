@@ -10,28 +10,27 @@ package patron.comando;
  * @author DELL
  */
 public class CutCommand implements Command {
-    private Application app;
     private Editor editor;
-    private String backup;
-    
-    public CutCommand(Application app, Editor editor){
-        this.app=app;
-        this.editor=editor;
+     private String backup;
+   
+
+    public CutCommand(Editor editor) {
+        this.editor = editor;
     }
-    
     private void saveBackup(){
         backup=editor.getText();
     }
     
+
     @Override
-    public void execute(){
+    public void execute() {
         saveBackup();
-        app.setClipboard(editor.getSelection());
+        editor.setBackup(editor.getSelection());    
         editor.deleteSelection();
     }
-    
+
     @Override
-    public void undo(){
+    public void undo() {
         editor.setText(backup);
     }
 }

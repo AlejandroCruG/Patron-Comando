@@ -4,27 +4,25 @@
  * and open the template in the editor.
  */
 package patron.comando;
-
 /**
  *
  * @author DELL
  */
 public class CopyCommand implements Command {
-    private Application app;
-    private Editor editor;
+     private Editor editor;
 
-    public CopyCommand(Application app, Editor editor) {
-        this.app = app;
+    public CopyCommand(Editor editor) {
         this.editor = editor;
     }
 
     @Override
     public void execute() {
-        app.setClipboard(editor.getSelection());
+       editor.setBackup(editor.getSelection()); 
     }
 
     @Override
     public void undo() {
-        // Copy command does not modify the state
+        // No hace nada. Copiar no altera el estado del editor.
     }
+
 }

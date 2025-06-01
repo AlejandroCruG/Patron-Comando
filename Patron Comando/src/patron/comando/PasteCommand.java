@@ -4,29 +4,28 @@
  * and open the template in the editor.
  */
 package patron.comando;
-
 /**
  *
  * @author DELL
  */
 public class PasteCommand implements Command {
-    private Application app;
     private Editor editor;
+    private String contentToPaste;
     private String backup;
 
-    public PasteCommand(Application app, Editor editor) {
-        this.app = app;
+    public PasteCommand(Editor editor) {
         this.editor = editor;
+        this.contentToPaste = editor.getBackup();
+        
     }
-
-    private void saveBackup() {
-        backup = editor.getText();
+    public void saveBackup(){
+        backup=editor.getText();
     }
 
     @Override
     public void execute() {
         saveBackup();
-        editor.replaceSelection(app.getClipboard());
+        editor.replaceSelection(contentToPaste);
     }
 
     @Override

@@ -4,13 +4,12 @@
  * and open the template in the editor.
  */
 package patron.comando;
-
 /**
  *
  * @author DELL
  */
 public class UndoCommand implements Command {
-    private Application app;
+     private Application app;
 
     public UndoCommand(Application app) {
         this.app = app;
@@ -23,6 +22,6 @@ public class UndoCommand implements Command {
 
     @Override
     public void undo() {
-        // UndoCommand doesn't need to be undone
+        // Comando Undo no necesita deshacerse
     }
 }

@@ -4,12 +4,13 @@
  * and open the template in the editor.
  */
 package patron.comando;
-
 /**
  *
  * @author DELL
  */
 public interface Command {
-    void execute();
-    void undo();
+    
+    public void execute();
+    public void undo();
+    
 }

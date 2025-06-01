@@ -10,42 +10,51 @@ import javax.swing.*;
  * @author DELL
  */
 public class Editor {
-     private JTextField textField;
-    private String selection = "";
+    private JTextArea textArea;
+    private String selection="";
+    private String backup="";
 
-    public void setTextField(JTextField field) {
-        this.textField = field;
+    public Editor(JTextArea textArea) {
+        this.textArea = textArea;
     }
 
     public String getText() {
-        return textField.getText();
+        return textArea.getText();
     }
 
     public void setText(String text) {
-        textField.setText(text);
-    }
-
-    public void updateSelection() {
-        int start = textField.getSelectionStart();
-        int end = textField.getSelectionEnd();
-        selection = textField.getText().substring(start, end);
+        textArea.setText(text);
     }
 
     public String getSelection() {
         return selection;
     }
+    
+    public void setBackup(String newBackup){
+        this.backup=newBackup;
+    }
+    
+    public String getBackup(){
+        return this.backup;
+    }
+    
+    public void updateSelection(){
+        int start = textArea.getSelectionStart();
+        int end = textArea.getSelectionEnd();
+        selection = textArea.getText().substring(start,end);
+    }
 
     public void deleteSelection() {
-        int start = textField.getSelectionStart();
-        int end = textField.getSelectionEnd();
-        String text = textField.getText();
-        textField.setText(text.substring(0, start) + text.substring(end));
+        int start = textArea.getSelectionStart();
+        int end = textArea.getSelectionEnd();
+        String text=textArea.getText();
+        textArea.setText(text.substring(0, start) + text.substring(end));
     }
 
     public void replaceSelection(String newText) {
-        int start = textField.getSelectionStart();
-        int end = textField.getSelectionEnd();
-        String text = textField.getText();
-        textField.setText(text.substring(0, start) + newText + text.substring(end));
+        int start = textArea.getSelectionStart();
+        int end = textArea.getSelectionEnd();
+        String text = textArea.getText();
+        textArea.setText(text.substring(0, start) + newText + text.substring(end));
     }
 }

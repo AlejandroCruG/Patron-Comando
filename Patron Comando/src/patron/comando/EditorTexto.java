@@ -1,0 +1,153 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package patron.comando;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+/**
+ *
+ * @author DELL
+ */
+public class EditorTexto {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+         SwingUtilities.invokeLater(() -> {
+            
+            JFrame frame = new JFrame("Editor con Patrón Command");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(800, 600);
+            frame.setLayout(new BorderLayout());
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+
+            // TextField (el editor visual)
+            JTextArea textArea = new JTextArea();
+            JTextArea areaClipboard = new JTextArea(5,20);
+            JTextArea areaHistorial = new JTextArea(5,20);
+            
+            areaClipboard.setEditable(false);
+            areaHistorial.setEditable(false);
+            
+            Application app = new Application();
+            Editor editor = new Editor(textArea);
+            frame.add(textArea, BorderLayout.NORTH);
+
+            JLabel labelInput = new JLabel("Texto Principal");
+            JLabel labelClipboard = new JLabel("Clipboard");
+            JLabel labelHistory = new JLabel("Historial de Comandos");
+    
+              // === Panel superior con input ===
+            JPanel panelInput = new JPanel(new BorderLayout());
+            panelInput.add(labelInput, BorderLayout.NORTH);
+            panelInput.add(new JScrollPane(textArea), BorderLayout.CENTER);
+            
+            // === Panel inferior con clipboard e historial ===
+            JPanel panelInfo = new JPanel(new GridLayout(1, 2));
+            JPanel clipboardPanel = new JPanel(new BorderLayout());
+            clipboardPanel.add(labelClipboard, BorderLayout.NORTH);
+            clipboardPanel.add(new JScrollPane(areaClipboard), BorderLayout.CENTER);
+
+            JPanel historyPanel = new JPanel(new BorderLayout());
+            historyPanel.add(labelHistory, BorderLayout.NORTH);
+            historyPanel.add(new JScrollPane(areaHistorial), BorderLayout.CENTER);
+
+            panelInfo.add(clipboardPanel);
+            panelInfo.add(historyPanel);
+
+             // === Botones ===
+            JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JButton cutButton = new JButton("Cortar");
+            JButton copyButton = new JButton("Copiar");
+            JButton pasteButton = new JButton("Pegar");
+            JButton undoButton = new JButton("Deshacer");
+
+            panel.add(copyButton);
+            panel.add(cutButton);
+            panel.add(pasteButton);
+            panel.add(undoButton);
+            
+             // === Acciones ===
+            Runnable actualizarVistas = () -> {
+                areaClipboard.setText(app.getClipboard());
+                areaHistorial.setText(app.getHistory().toString());
+            };
+            Action doCopy = new AbstractAction() {
+                    public void actionPerformed(ActionEvent e) {
+                        editor.updateSelection();
+                        CopyCommand copy=new CopyCommand(editor);
+                        app.executeCommand(copy);
+                        app.setClipboard(editor.getBackup());
+                        actualizarVistas.run();
+                    }
+                };
+
+                Action doCut = new AbstractAction() {
+                    public void actionPerformed(ActionEvent e) {
+                        editor.updateSelection();
+                        CutCommand cut = new CutCommand(editor);
+                        app.executeCommand(cut);
+                        app.setClipboard(editor.getBackup());
+                        actualizarVistas.run();
+                    }
+                };
+
+                Action doPaste = new AbstractAction() {
+                    public void actionPerformed(ActionEvent e) {
+                        editor.setBackup(app.getClipboard());
+                        editor.updateSelection();
+                        PasteCommand paste = new PasteCommand(editor);
+                        app.executeCommand(paste);
+                        actualizarVistas.run();
+                    }
+                };
+
+                Action doUndo = new AbstractAction() {
+                    public void actionPerformed(ActionEvent e) {
+                        app.undo();
+                        actualizarVistas.run();
+                    }
+                };
+           
+            // Botones
+            copyButton.addActionListener(doCopy);
+            cutButton.addActionListener(doCut);
+            pasteButton.addActionListener(doPaste);
+            undoButton.addActionListener(doUndo);
+
+            // Atajos de teclado
+            InputMap inputMap = textArea.getInputMap(JComponent.WHEN_FOCUSED);
+            ActionMap actionMap = textArea.getActionMap();
+
+            inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK), "copy");
+            inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK), "cut");
+            inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK), "paste");
+            inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), "undo");
+
+            actionMap.put("copy", doCopy);
+            actionMap.put("cut", doCut);
+            actionMap.put("paste", doPaste);
+            actionMap.put("undo", doUndo);
+            
+        // === Layout general ===
+            frame.setLayout(new BorderLayout());
+            frame.add(panelInput, BorderLayout.CENTER);
+            frame.add(panelInfo, BorderLayout.SOUTH);
+            frame.add(panel, BorderLayout.NORTH);
+            frame.setVisible(true);
+            
+            copyButton.setBackground(new Color(204, 255, 204)); // verde claro
+            cutButton.setBackground(new Color(255, 204, 204)); // rojo claro
+            pasteButton.setBackground(new Color(204, 229, 255)); // azul claro
+            undoButton.setBackground(new Color(255, 255, 204)); // amarillo claro
+            undoButton.setForeground(Color.DARK_GRAY);
+        });
+    }
+    
+}
