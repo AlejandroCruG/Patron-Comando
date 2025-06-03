@@ -14,10 +14,11 @@ public class Editor {
     private String selection="";
     private String backup="";
 
-    public Editor(JTextArea textArea) {
-        this.textArea = textArea;
-    }
 
+
+    public void setTextArea(JTextArea textArea){
+        this.textArea=textArea;
+    }
     public String getText() {
         return textArea.getText();
     }

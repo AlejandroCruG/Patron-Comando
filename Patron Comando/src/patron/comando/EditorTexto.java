@@ -14,12 +14,27 @@ import java.awt.event.*;
  */
 public class EditorTexto {
 
-    /**
-     * @param args the command line arguments
-     */
+    private static Editor editor;
+    private static Application app;
+    
+    private static CutCommand cut;
+    private static CopyCommand copy;
+    private static PasteCommand paste;
+    
+
+    public EditorTexto(){
+
+    }
+
     public static void main(String[] args) {
-         SwingUtilities.invokeLater(() -> {
-            
+        
+
+        SwingUtilities.invokeLater(EditorTexto::createUI);
+    }
+
+    public static void createUI(){
+
+
             JFrame frame = new JFrame("Editor con Patrón Command");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(800, 600);
@@ -30,96 +45,89 @@ public class EditorTexto {
             // TextField (el editor visual)
             JTextArea textArea = new JTextArea();
             JTextArea areaClipboard = new JTextArea(5,20);
-            JTextArea areaHistorial = new JTextArea(5,20);
-            
+           
+
             areaClipboard.setEditable(false);
-            areaHistorial.setEditable(false);
+            editor = new Editor();
+            editor.setTextArea(textArea);
+            copy = new CopyCommand(editor);
+            cut =new CutCommand(editor);
+            paste = new PasteCommand(editor);
+            app= new Application();
             
-            Application app = new Application();
-            Editor editor = new Editor(textArea);
             frame.add(textArea, BorderLayout.NORTH);
 
             JLabel labelInput = new JLabel("Texto Principal");
             JLabel labelClipboard = new JLabel("Clipboard");
-            JLabel labelHistory = new JLabel("Historial de Comandos");
-    
-              // === Panel superior con input ===
+           
+
+            // === Panel superior con input ===
             JPanel panelInput = new JPanel(new BorderLayout());
             panelInput.add(labelInput, BorderLayout.NORTH);
             panelInput.add(new JScrollPane(textArea), BorderLayout.CENTER);
-            
+
             // === Panel inferior con clipboard e historial ===
             JPanel panelInfo = new JPanel(new GridLayout(1, 2));
             JPanel clipboardPanel = new JPanel(new BorderLayout());
             clipboardPanel.add(labelClipboard, BorderLayout.NORTH);
             clipboardPanel.add(new JScrollPane(areaClipboard), BorderLayout.CENTER);
 
-            JPanel historyPanel = new JPanel(new BorderLayout());
-            historyPanel.add(labelHistory, BorderLayout.NORTH);
-            historyPanel.add(new JScrollPane(areaHistorial), BorderLayout.CENTER);
-
             panelInfo.add(clipboardPanel);
-            panelInfo.add(historyPanel);
 
-             // === Botones ===
+            // === Botones ===
             JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             JButton cutButton = new JButton("Cortar");
             JButton copyButton = new JButton("Copiar");
             JButton pasteButton = new JButton("Pegar");
-            JButton undoButton = new JButton("Deshacer");
 
             panel.add(copyButton);
             panel.add(cutButton);
             panel.add(pasteButton);
-            panel.add(undoButton);
-            
-             // === Acciones ===
+          
+            // === Acciones ===
             Runnable actualizarVistas = () -> {
-                areaClipboard.setText(app.getClipboard());
-                areaHistorial.setText(app.getHistory().toString());
+                areaClipboard.setText(editor.getBackup());
             };
             Action doCopy = new AbstractAction() {
-                    public void actionPerformed(ActionEvent e) {
-                        editor.updateSelection();
-                        CopyCommand copy=new CopyCommand(editor);
-                        app.executeCommand(copy);
-                        app.setClipboard(editor.getBackup());
-                        actualizarVistas.run();
-                    }
-                };
+                public void actionPerformed(ActionEvent e) {
+                    editor.updateSelection();
 
-                Action doCut = new AbstractAction() {
-                    public void actionPerformed(ActionEvent e) {
-                        editor.updateSelection();
-                        CutCommand cut = new CutCommand(editor);
-                        app.executeCommand(cut);
-                        app.setClipboard(editor.getBackup());
-                        actualizarVistas.run();
-                    }
-                };
 
-                Action doPaste = new AbstractAction() {
-                    public void actionPerformed(ActionEvent e) {
-                        editor.setBackup(app.getClipboard());
-                        editor.updateSelection();
-                        PasteCommand paste = new PasteCommand(editor);
-                        app.executeCommand(paste);
-                        actualizarVistas.run();
-                    }
-                };
+                    app.setCommand(copy);
+                    app.executeCommand();
 
-                Action doUndo = new AbstractAction() {
-                    public void actionPerformed(ActionEvent e) {
-                        app.undo();
-                        actualizarVistas.run();
-                    }
-                };
-           
+                    actualizarVistas.run();
+                }
+            };
+
+            Action doCut = new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+                    editor.updateSelection();
+
+                    app.setCommand(cut);
+                    app.executeCommand();
+
+                    actualizarVistas.run();
+                }
+            };
+
+            Action doPaste = new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+
+                   // editor.updateSelection();
+
+                    app.setCommand(paste);
+                    app.executeCommand();
+                    actualizarVistas.run();
+                }
+            };
+
+
             // Botones
             copyButton.addActionListener(doCopy);
             cutButton.addActionListener(doCut);
             pasteButton.addActionListener(doPaste);
-            undoButton.addActionListener(doUndo);
+ 
 
             // Atajos de teclado
             InputMap inputMap = textArea.getInputMap(JComponent.WHEN_FOCUSED);
@@ -128,26 +136,22 @@ public class EditorTexto {
             inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK), "copy");
             inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK), "cut");
             inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK), "paste");
-            inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), "undo");
 
             actionMap.put("copy", doCopy);
             actionMap.put("cut", doCut);
             actionMap.put("paste", doPaste);
-            actionMap.put("undo", doUndo);
-            
-        // === Layout general ===
+
+            // === Layout general ===
             frame.setLayout(new BorderLayout());
             frame.add(panelInput, BorderLayout.CENTER);
             frame.add(panelInfo, BorderLayout.SOUTH);
             frame.add(panel, BorderLayout.NORTH);
             frame.setVisible(true);
-            
+
             copyButton.setBackground(new Color(204, 255, 204)); // verde claro
             cutButton.setBackground(new Color(255, 204, 204)); // rojo claro
             pasteButton.setBackground(new Color(204, 229, 255)); // azul claro
-            undoButton.setBackground(new Color(255, 255, 204)); // amarillo claro
-            undoButton.setForeground(Color.DARK_GRAY);
-        });
     }
+
     
 }

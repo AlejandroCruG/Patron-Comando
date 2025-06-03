@@ -11,26 +11,15 @@ package patron.comando;
  */
 public class CutCommand implements Command {
     private Editor editor;
-     private String backup;
-   
-
+  
     public CutCommand(Editor editor) {
-        this.editor = editor;
-    }
-    private void saveBackup(){
-        backup=editor.getText();
+        this.editor = editor;         
     }
     
-
     @Override
     public void execute() {
-        saveBackup();
         editor.setBackup(editor.getSelection());    
         editor.deleteSelection();
     }
 
-    @Override
-    public void undo() {
-        editor.setText(backup);
-    }
 }

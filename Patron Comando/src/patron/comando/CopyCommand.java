@@ -20,9 +20,4 @@ public class CopyCommand implements Command {
        editor.setBackup(editor.getSelection()); 
     }
 
-    @Override
-    public void undo() {
-        // No hace nada. Copiar no altera el estado del editor.
-    }
-
 }

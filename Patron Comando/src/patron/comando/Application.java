@@ -9,30 +9,15 @@ package patron.comando;
  * @author DELL
  */
 public class Application {
-    private CommandHistory history = new CommandHistory();
-    private String clipboard = "";
+   
+    private Command command;
 
-    public void executeCommand(Command command) {
-        command.execute();
-        history.push(command);
+    public void setCommand(Command command){
+        this.command=command;
     }
-    public CommandHistory getHistory() {
-        return history;
-    }
-
-    public void undo() {
-        if (!history.isEmpty()) {
-            Command last = history.pop();
-            last.undo();
+    public void executeCommand(){
+        if (command !=null){
+            command.execute();
         }
-    }
-
-    public String getClipboard() {
-        return clipboard;
-    }
-    
-    public void setClipboard(String text){
-        this.clipboard=text;
-    }
-    
+    }    
 }

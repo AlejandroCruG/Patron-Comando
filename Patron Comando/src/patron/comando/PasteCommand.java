@@ -10,26 +10,15 @@ package patron.comando;
  */
 public class PasteCommand implements Command {
     private Editor editor;
-    private String contentToPaste;
-    private String backup;
+ 
 
     public PasteCommand(Editor editor) {
-        this.editor = editor;
-        this.contentToPaste = editor.getBackup();
-        
+        this.editor = editor;     
     }
-    public void saveBackup(){
-        backup=editor.getText();
+  
+    @Override
+    public void execute() { 
+        editor.replaceSelection(editor.getBackup());
     }
 
-    @Override
-    public void execute() {
-        saveBackup();
-        editor.replaceSelection(contentToPaste);
-    }
-
-    @Override
-    public void undo() {
-        editor.setText(backup);
-    }
 }
